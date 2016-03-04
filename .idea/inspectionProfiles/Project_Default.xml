@@ -1,0 +1,44 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <option name="myLocal" value="true" />
+    <inspection_tool class="CallerJS" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="CheckDtdRefs" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="CheckTagEmptyBody" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="CheckXmlFileWithXercesValidator" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoAssignmentToConstant" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoDeferGo" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoDuplicateArgument" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoDuplicateFieldsOrMethods" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoDuplicateFunction" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoDuplicateMethod" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoDuplicateReturnArgument" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoFunctionCall" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoFunctionVariadicParameter" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoNoNewVariables" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoReturn" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoUnresolvedReference" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoUnusedFunction" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="GoUnusedGlobalVariable" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="GoUnusedImportDeclaration" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoUnusedVariable" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="GoVarDeclaration" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="JSCheckFunctionSignatures" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="JSCommentMatchesSignature" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JSJQueryEfficiency" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JSUnfilteredForInLoop" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JSValidateJSDoc" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="JadeTabsAndSpaces" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="UnresolvedReference" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="UnterminatedStatementJS" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="ignoreSemicolonAtEndOfBlock" value="true" />
+    </inspection_tool>
+    <inspection_tool class="WithStatementJS" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="XmlDuplicatedId" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="XmlInvalidId" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="XmlPathReference" enabled="false" level="ERROR" enabled_by_default="false" />
+    <inspection_tool class="XmlUnboundNsPrefix" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="XmlUnusedNamespaceDeclaration" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="XmlWrongRootElement" enabled="false" level="ERROR" enabled_by_default="false" />
+  </profile>
+</component>
