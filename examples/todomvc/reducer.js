@@ -10,12 +10,12 @@ const defaultMessage = ''
 
 
 export default combineReducers({
-  count : function(state, action){
+  count : function(state=defaultCount, action){
     console.log( action , state)
     if( action.type === ACTION_ADD ){
       return state +1
     }else{
-      return defaultCount
+      return state
     }
   },
   message : function( state, action){

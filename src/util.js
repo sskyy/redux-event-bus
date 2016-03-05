@@ -1,4 +1,4 @@
-import React from 'react'
+
 import {NamedYieldable, Listener} from './types'
 
 
@@ -17,21 +17,10 @@ export function name(yieldable, name){
 }
 
 
-export function monitor(){
-  return WrappedComponent=>{
-    return ()=>{
-      return <div></div>
-    }
-
-    return (props)=>{
-      return <WrappedComponent {...props} />
-    }
-  }
-}
-
 
 export function fromReduxAction( ReduxActionType ){
   return function(action){
     return action.type === ReduxActionType
   }
 }
+

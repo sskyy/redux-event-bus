@@ -46,10 +46,12 @@
     }
   ],
   "dependencies": {
+    "hoist-non-react-statics": "^1.0.5",
     "lodash.clonedeep": "~4.3.0",
     "object-assign": "^4.0.1",
     "react": "^0.14.7",
     "react-redux": "~4.4.0",
-    "redux": "~3.3.1"
+    "redux": "~3.3.1",
+    "shallowequal": "^0.2.2"
   }
 }

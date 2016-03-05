@@ -15,32 +15,34 @@ export default class Bus {
   callHandler(handler, ...args){
     // wrap handler in a generator
     // so handler can be named.
-    const genFn = function* wrap() {
-      yield handler
-    }
-    return this.co(genFn, ...args)
-  }
-  co(genFn, ...args) {
-    const ctx = this;
+    return this.co(function*(){
+      yield handler(...args)
+    })
 
-    return new Promise(function (resolve, reject) {
-      const gen = genFn.apply(ctx, args);
+  }
+  co(gen, ...args) {
+    var ctx = this;
+    var args = slice.call(arguments, 1)
+
+    return new Promise(function(resolve, reject) {
+      if (typeof gen === 'function') gen = gen.apply(ctx, args);
+      if (!gen || typeof gen.next !== 'function') return resolve(gen);
 
       onFulfilled();
 
       function onFulfilled(res) {
-        var ret;
+        let ret;
         try {
           ret = gen.next(res);
         } catch (e) {
           return reject(e);
         }
         next(ret);
-        return null;
       }
 
+
       function onRejected(err) {
-        var ret;
+        let ret;
         try {
           ret = gen.throw(err);
         } catch (e) {
@@ -50,24 +52,26 @@ export default class Bus {
       }
 
       function next(ret) {
+        const isValueNameYieldable = isNamedYieldable(ret.value)
+        const yieldableName = isValueNameYieldable ? ret.value.name : null
+        const retValue = isValueNameYieldable ? ret.value.yieldable : ret.value
+        if (ret.done) return resolve(retValue);
 
-        if (ret.done) return resolve(ret.value);
-
-        const isNamedYieldableValue = isNamedYieldable(ret.value)
-        const yieldableName = ret.value.name
-
-        var value = toPromise.call(ctx, isNamedYieldableValue? ret.value.yieldable : ret.value, ctx.co);
-        debugger
-        if ( !value || !isPromise(value)){
-          return onRejected(new TypeError(`You may only yield a function, promise, generator, array, or object, but the following object was passed: ${String(ret.value)}`));
+        ctx.changeStatus(yieldableName, 'pending')
+        const value = toPromise.call(ctx, retValue, ctx.co);
+        if (value && isPromise(value)){
+          return value.then(
+              isValueNameYieldable ?
+                  decorate(ctx.changeStatus.bind(ctx,yieldableName, 'resolved'), onFulfilled):
+                  onFulfilled,
+              isValueNameYieldable ?
+                  decorate(ctx.changeStatus.bind(ctx,yieldableName, 'rejected'), onRejected):
+              onRejected
+          );
         }
 
-        if( isNamedYieldableValue ) ctx.changeStatus(yieldableName, 'pending')
-
-        return value.then(
-          decorate(ctx.changeStatus.bind(ctx,yieldableName,'resolved'),onFulfilled),
-          decorate(ctx.changeStatus.bind(ctx,yieldableName,'rejected'),onRejected)
-        );
+        return onRejected(new TypeError('You may only yield a function, promise, generator, array, or object, '
+            + 'but the following object was passed: "' + String(ret.value) + '"'));
       }
     });
   }
@@ -177,3 +181,4 @@ function isObject(val) {
 function isNamedYieldable(ins){
   return ins instanceof  NamedYieldable
 }
+

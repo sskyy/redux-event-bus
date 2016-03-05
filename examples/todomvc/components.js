@@ -1,9 +1,8 @@
 import React from 'react'
 import {ACTION_ADD,ACTION_ADD_ASYNC} from './reducer'
 import {connect} from 'react-redux'
-import {monitor} from 'redux-event-bus/util'
+import {monitor} from 'redux-event-bus'
 import {PROMISE_ADDING} from './listener'
-
 
 
 export const Input = connect(state=>{
@@ -27,17 +26,19 @@ export const Message = connect()(
 )
 
 
-function mapPromiseToState(promises){
+function mapPromiseToState(status){
   return {
-    p : promises[PROMISE_ADDING]
+    addingState : status[PROMISE_ADDING]
   }
 }
 
-export const Indicator = monitor(mapPromiseToState)(
+export const Indicator = monitor(mapPromiseToState,connect(f=>f))(
   (props)=>{
-    return <div>current promise state:{props.p.status}</div>
+    console.log( JSON.stringify(props))
+    return <div>current promise state:{props.addingState}</div>
   }
 )
+
 
 
 
