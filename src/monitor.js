@@ -19,11 +19,11 @@ export default function monitor(mapStateToProps, connected){
             }
             constructor(props,context){
                 super(props, context)
-                if( context.store.bus === undefined){
+                if( context.store.liftedStore === undefined){
                     throw new Error('Did you forget to use enhancer to create store?')
                 }
-                this.bus = context.store.bus
-                this.state = {status:mapStateToProps(this.bus.status)}
+                this.bus = context.store.liftedStore.bus
+                this.state = {taskState:mapStateToProps(this.bus.state)}
             }
             componentDidMount(){
                 this.unsubscrib = this.bus.onStatusChange(this.handleStatusChange.bind(this))
@@ -33,9 +33,9 @@ export default function monitor(mapStateToProps, connected){
             }
             handleStatusChange(status) {
                 const newMappedStatus = mapStateToProps(status)
-                if (!shallowEqual(newMappedStatus, this.state.status)) {
+                if (!shallowEqual(newMappedStatus, this.state.taskState)) {
                     this.hasStatusChanged = true
-                    this.setState({status: newMappedStatus})
+                    this.setState({taskState: newMappedStatus})
                 }
             }
             componentWillReceiveProps(nextProps) {
@@ -44,8 +44,7 @@ export default function monitor(mapStateToProps, connected){
             render(){
                 this.haveOwnPropsChanged = false
                 this.hasStatusChanged = false
-                console.log(1111, JSON.stringify(this.state.status))
-                return createElement(WrappedComponent, {...this.state.status, ...this.props})
+                return createElement(WrappedComponent, {...this.state.taskState, ...this.props})
 
             }
         }

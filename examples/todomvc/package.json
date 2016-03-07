@@ -21,6 +21,7 @@
     "babel-polyfill": "~6.6.1",
     "classnames": "^2.1.2",
     "co": "~4.6.0",
+    "hoist-non-react-statics": "~1.0.5",
     "react": "^0.14.0",
     "react-dom": "^0.14.0",
     "react-redux": "^4.0.0",

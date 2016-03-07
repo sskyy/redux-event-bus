@@ -72,3 +72,7 @@ export function shallowEqual(objA, objB) {
 
   return true
 }
+
+export function flat( arr ){
+  return arr.reduce((a, b)=>a.concat(b),[])
+}

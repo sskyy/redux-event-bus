@@ -1,31 +1,52 @@
 import {NamedYieldable, Listener} from './types'
 import {decorate} from './helpers'
+import assign from 'object-assign'
 const slice = Array.prototype.slice;
 
-
+export const PENDING_STATE = 'pending'
+export const FULFILLED_STATE = 'resolved'
+export const REJECTED_STATE = 'rejected'
+export const CANCELED_STATE = 'canceled'
+export const CANCELED_ERROR = 'task canceled'
 
 export default class Bus {
   constructor() {
     this.listeners = []
     //save status
-    this.status = {}
-    this.statusListeners = []
-    //TODO task control
+    this.state = {}
+    this.taskStateListeners = []
+    this.defaultContext = {}
+    //TODO task control, cancel
+  }
+  setDefaultContext( args ){
+    this.defaultContext = args
+  }
+  computeContext(){
+    return {
+      ...this.defaultContext,
+      cancel : ()=>{},
+      getTaskState : ()=>{
+        return assign({}, this.state)
+      }
+    }
+  }
+  wrapHandler( handler ){
+    return function*(...args){
+      yield handler(...args)
+    }
   }
   callHandler(handler, ...args){
     // wrap handler in a generator
     // so handler can be named.
-    return this.co(function*(){
-      yield handler(...args)
-    })
-
+    return this.co(this.wrapHandler(handler), ...args)
   }
   co(gen, ...args) {
-    var ctx = this;
-    var args = slice.call(arguments, 1)
+    const ctx = this;
+    const computedArgs = this.computeContext()
 
     return new Promise(function(resolve, reject) {
-      if (typeof gen === 'function') gen = gen.apply(ctx, args);
+
+      if (typeof gen === 'function') gen = gen.call(ctx, computedArgs, ...args);
       if (!gen || typeof gen.next !== 'function') return resolve(gen);
 
       onFulfilled();
@@ -57,34 +78,51 @@ export default class Bus {
         const retValue = isValueNameYieldable ? ret.value.yieldable : ret.value
         if (ret.done) return resolve(retValue);
 
-        ctx.changeStatus(yieldableName, 'pending')
-        const value = toPromise.call(ctx, retValue, ctx.co);
+        ctx.changeTaskState(yieldableName, PENDING_STATE)
+        const value = toPromise.call(ctx, retValue, ctx.co, args);
         if (value && isPromise(value)){
           return value.then(
               isValueNameYieldable ?
-                  decorate(ctx.changeStatus.bind(ctx,yieldableName, 'resolved'), onFulfilled):
+                  decorate(
+                    ctx.changeTaskState.bind(ctx,yieldableName, FULFILLED_STATE),
+                    ctx.toCancelable( yieldableName, onFulfilled, onRejected)
+                    //onFulfilled
+                  ):
                   onFulfilled,
               isValueNameYieldable ?
-                  decorate(ctx.changeStatus.bind(ctx,yieldableName, 'rejected'), onRejected):
+                  decorate(
+                    ctx.changeTaskState.bind(ctx,yieldableName, REJECTED_STATE),
+                    ctx.toCancelable(yieldableName, onRejected, onRejected)
+                    //onRejected
+                  ):
               onRejected
           );
         }
 
-        return onRejected(new TypeError('You may only yield a function, promise, generator, array, or object, '
-            + 'but the following object was passed: "' + String(ret.value) + '"'));
+        return onRejected(new TypeError(
+          `You may only yield a function, promise, generator, array, or object, but the following object was passed: "${String(ret.value)}"`
+        ));
       }
     });
   }
-  changeStatus(statusName, status){
-    this.status[statusName] = status
-    this.statusListeners.forEach(handler=>{
-      handler(this.status)
+  toCancelable( taskName, originCallback, onRejected){
+    return (res)=>{
+      return (this.state[taskName] === CANCELED_STATE)?
+        onRejected(CANCELED_ERROR) : originCallback(res)
+    }
+  }
+  changeTaskState(taskName, status){
+    this.state[taskName] = status
+    // TODO sync by default, async by option
+    this.taskStateListeners.forEach(handler=>{
+      handler(this.state)
     })
   }
   onStatusChange(listener){
-    this.statusListeners.push(listener)
+    this.taskStateListeners.push(listener)
   }
   emit(event, ...args) {
+
     this.listeners.forEach(listener=> {
       if (typeof listener.listenTo === 'function') {
         if (listener.listenTo(event)) {
@@ -101,15 +139,14 @@ export default class Bus {
 }
 
 
-
 //////////////////////////////
 //  utils
 //////////////////////////////
 
-function toPromise(obj, promiseCall) {
+function toPromise(obj, promiseCall, args) {
   if (! obj) return obj;
   if (isPromise(obj)) return obj;
-  if (isGeneratorFunction(obj) || isGenerator(obj)) return promiseCall.call(this, obj);
+  if (isGeneratorFunction(obj) || isGenerator(obj)) return promiseCall.call(this, obj, ...args);
   if ('function' == typeof obj) return thunkToPromise.call(this, obj);
   if (Array.isArray(obj)) return arrayToPromise.call(this, obj);
   if (isObject(obj)) return objectToPromise.call(this, obj);
@@ -182,3 +219,10 @@ function isNamedYieldable(ins){
   return ins instanceof  NamedYieldable
 }
 
+
+// TODO 优先级工具
+// TODO listen to 多个事件
+
+// TODO 文档
+
+// TODO 调试工具结合

@@ -1,4 +1,5 @@
 import assign from 'object-assign'
+import {flat} from './helpers'
 import Bus from './bus'
 
 export const ActionTypes = {
@@ -79,22 +80,24 @@ export default function createEnhancer( listeners ){
 
     return createStore=>(reducer, initialState, enhancer)=>{
         const bus = new Bus
-        function liftReducer(r){
+
+        function liftReducer(r, bus){
             return liftReducerWithBus(r, initialState, bus)
         }
         //once we createStore, it will use internal dispatch init action
-        const liftedStore = createStore(liftReducer(reducer),  enhancer)
+        const liftedStore = createStore(liftReducer(reducer, bus),  enhancer)
+        const store = unliftStore(liftedStore,liftReducer, bus)
+        bus.setDefaultContext({
+            dispatch: store.dispatch,
+            getState: store.getState
+        })
 
-        //expose bus API
         liftedStore.bus = bus
 
-        const store = unliftStore(liftedStore,liftReducer, bus)
-
-        listeners.forEach(listener=> {
-            listener.handler = listener.handler.bind(bus, {
-                dispatch: store.dispatch,
-                getState: store.getState
-            })
+        //flat listeners
+        //so we can create multiple listeners which shares a closure
+        console.log( listeners )
+        flat(listeners).forEach(listener=> {
             bus.listen(listener)
         })
 
