@@ -9,7 +9,7 @@ A Side Effects manager for redux. The idea is really simple : we give an asynchr
 A listener is a generator which will be called when a certain **event** is emitted. A task is a named generator, a promise, or a function returns a promise or generator. So, a generator can be both named and be used as listener at same time. In the code below, we named a generator as `loginTask`, so it is a task now. And we also use it as a listener to handle event `login`.
 
 
-```
+```javascript
 import {listen, name} from 'redux-task'
 
 function* loginCurrentUser(){
@@ -26,7 +26,7 @@ const loginListener = listen( 'login', name(loginCurrentUser, 'loginTask'))
 
 Then we can create our store:
 
-```
+```javascript
 import {createEnhancer} from 'redux-task'
 
 const store = createStore(reducer, {}, createEnhancer([loginListener]));
@@ -37,7 +37,7 @@ const store = createStore(reducer, {}, createEnhancer([loginListener]));
 
 Finally, let's see how to emit a event, and how to get the state of the yield task. We will use api `monitor` to wrap our component. The usage is quite similar as redux api `connect`. It takes a function to map task state to props. And monitor will pass an aditional method called `emit` to your component, so you can use it to emit evemt.
 
-```
+```javascript
 import {monitor} from 'redux-task'
 
 const App = (props)=>{
@@ -66,8 +66,8 @@ Nearly anything synchronous can be named as task.
 
 
 #### Name a listener
-```
 
+```javascript
 listen( 'login', name(function*(){
 	...
 }, 'loginTask'))
@@ -76,7 +76,7 @@ listen( 'login', name(function*(){
 
 #### Name a promise inside listener
 
-```
+```javascript
 listen('login', function *(){
 
 	yield name(new Promise(resolve=>{
@@ -87,7 +87,7 @@ listen('login', function *(){
 
 #### Name a generator inside listener
 
-```
+```javascript
 listen('login', function *(){
 
 	yield name(function*(){
@@ -100,7 +100,7 @@ listen('login', function *(){
 
 listener will receive two part of arguments. The first is an object with basic apis, the second is the arguments emitted with the event. We can use the api `getTaskState` in the first object.
 
- ```
+```javascript
 listen( 'login', name(function*(){
 	...
 }, 'loginTask'))
@@ -118,7 +118,7 @@ listen( 'logout', function*({getTaskState}){
 
 Let's still use our example above. Let's say our use submitted the login form, and quickly click the cancel button.
 
-```
+```javascript
 import {listen, name} from 'redux-task'
 
 function* loginCurrentUser({dispatch}){
