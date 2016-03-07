@@ -4,7 +4,7 @@ import { render } from 'react-dom'
 import App from './App'
 import {Provider} from 'react-redux'
 import {createStore, compose, applyMiddleware} from 'redux'
-import {createEnhancer} from 'redux-event-bus'
+import {createEnhancer} from 'redux-task'
 import countListener from './listener'
 import reducer from './reducer'
 

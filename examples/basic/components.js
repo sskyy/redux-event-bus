@@ -1,7 +1,7 @@
 import React from 'react'
 import {ACTION_ADD,ACTION_ADD_ASYNC} from './reducer'
 import {connect} from 'react-redux'
-import {monitor} from 'redux-event-bus'
+import {monitor} from 'redux-task'
 import {TASK_ADDING} from './listener'
 
 

@@ -14,6 +14,7 @@ export default class Bus {
     this.listeners = []
     //save status
     this.state = {}
+    this.cancelHandlers = {}
     this.taskStateListeners = []
     this.defaultContext = {}
     //TODO task control, cancel
@@ -24,7 +25,12 @@ export default class Bus {
   computeContext(){
     return {
       ...this.defaultContext,
-      cancel : ()=>{},
+      cancel : (taskName)=>{
+        //TODO check is it cancelable
+        console.log('setting', taskName, 'to cancel')
+        this.cancelHandlers[taskName](CANCELED_ERROR)
+        this.changeTaskState(taskName,CANCELED_STATE)
+      },
       getTaskState : ()=>{
         return assign({}, this.state)
       }
@@ -76,39 +82,55 @@ export default class Bus {
         const isValueNameYieldable = isNamedYieldable(ret.value)
         const yieldableName = isValueNameYieldable ? ret.value.name : null
         const retValue = isValueNameYieldable ? ret.value.yieldable : ret.value
-        if (ret.done) return resolve(retValue);
-
-        ctx.changeTaskState(yieldableName, PENDING_STATE)
-        const value = toPromise.call(ctx, retValue, ctx.co, args);
-        if (value && isPromise(value)){
-          return value.then(
-              isValueNameYieldable ?
-                  decorate(
-                    ctx.changeTaskState.bind(ctx,yieldableName, FULFILLED_STATE),
-                    ctx.toCancelable( yieldableName, onFulfilled, onRejected)
-                    //onFulfilled
-                  ):
-                  onFulfilled,
-              isValueNameYieldable ?
-                  decorate(
-                    ctx.changeTaskState.bind(ctx,yieldableName, REJECTED_STATE),
-                    ctx.toCancelable(yieldableName, onRejected, onRejected)
-                    //onRejected
-                  ):
-              onRejected
-          );
+        // condition 1:  done
+        if (ret.done){
+          if( isValueNameYieldable ) ctx.changeTaskState(yieldableName, FULFILLED_STATE)
+          return resolve(retValue);
         }
 
-        return onRejected(new TypeError(
-          `You may only yield a function, promise, generator, array, or object, but the following object was passed: "${String(ret.value)}"`
-        ));
+        // condition 2: error
+        const promise = toPromise.call(ctx, retValue, ctx.co, args);
+
+        if( !promise || !isPromise(promise)){
+          return onRejected(new TypeError(
+            `You may only yield a function, promise, generator, array, or object, but the following object was passed: "${String(ret.value)}"`
+          ));
+        }
+
+        // condition 3: promise
+
+        if (promise && isPromise(promise)){
+
+          if( isValueNameYieldable ){
+            // condition 3.1 : with name
+            ctx.changeTaskState(yieldableName, PENDING_STATE)
+            return new Promise((resolve, reject)=>{
+              //save the reject method as cancel
+              ctx.cancelHandlers[yieldableName] = reject
+
+              const onFulfilledWithStateChange = decorate(ctx.changeTaskState.bind(ctx, yieldableName, FULFILLED_STATE))
+              const onRejectedWithStateChange = decorate(ctx.changeTaskState.bind(ctx, yieldableName, REJECTED_STATE))
+
+              return promise
+                .then(ctx.toCancelable(yieldableName, onFulfilledWithStateChange))
+                .then(ctx.toCancelable(yieldableName, resolve))
+                .catch(decorate(
+                  ctx.toCancelable(yieldableName, onRejectedWithStateChange),
+                  ctx.toCancelable(yieldableName, reject)
+                ))
+
+            })
+          }else{
+            // condition 3.2 : without name
+            return promise.then(onFulfilled,onRejected);
+          }
+        }
       }
     });
   }
-  toCancelable( taskName, originCallback, onRejected){
+  toCancelable( taskName, originCallback){
     return (res)=>{
-      return (this.state[taskName] === CANCELED_STATE)?
-        onRejected(CANCELED_ERROR) : originCallback(res)
+      return (this.state[taskName] !== CANCELED_STATE) && originCallback(res)
     }
   }
   changeTaskState(taskName, status){
@@ -142,6 +164,8 @@ export default class Bus {
 //////////////////////////////
 //  utils
 //////////////////////////////
+
+
 
 function toPromise(obj, promiseCall, args) {
   if (! obj) return obj;
@@ -220,8 +244,9 @@ function isNamedYieldable(ins){
 }
 
 
-// TODO 优先级工具
-// TODO listen to 多个事件
+// TODO check 多个 generator 组合的时候, cancel 是否表现正常
+
+// TODO 增加异常判断,不能有同名的 task 跑起来
 
 // TODO 文档
 
