@@ -21,7 +21,7 @@ export const Input = connect(state=>{
   }
 )
 
-export const Message = connect()(
+export const Message = connect(f=>f)(
   (props)=>{
     return <div>message from reducer : {props.message}</div>
   }
@@ -36,6 +36,6 @@ function mapPromiseToState(status) {
 
 export const Indicator = monitor(mapPromiseToState)(connect(f=>f)(
   (props)=>{
-    return <div>current promise state:{props.addingState}</div>
+    return <div>current promise state:<strong>{props.addingState}</strong></div>
   }
 ))
