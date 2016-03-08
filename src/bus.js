@@ -45,6 +45,7 @@ export default class Bus {
     // so handler can be named.
     return this.co(this.wrapHandler(handler), ...args)
   }
+  // learned from co.js, thanks to tj.
   co(gen, ...args) {
     const ctx = this
     const computedArgs = this.computeContext()
@@ -238,12 +239,3 @@ function isObject(val) {
 function isNamedYieldable(ins) {
   return ins instanceof  NamedYieldable
 }
-
-
-// TODO check 多个 generator 组合的时候, cancel 是否表现正常
-
-// TODO 增加异常判断,不能有同名的 task 跑起来
-
-// TODO 文档
-
-// TODO 调试工具结合
