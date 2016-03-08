@@ -58,7 +58,7 @@ function mapTaskStateToProps(state){
 export default monitor(mapTaskStateToProps)(App)
 ```
 
-## 2. Advanced usage
+## 2. Usage
 
 ### 2.1 Name a task
 
