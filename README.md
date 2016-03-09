@@ -72,7 +72,7 @@ Nearly anything synchronous can be named as task.
 #### Name a listener
 
 ```javascript
-listen( 'login', name(function*(){
+listen('login', name(function* (){
 	...
 }, 'loginTask'))
 
@@ -81,7 +81,7 @@ listen( 'login', name(function*(){
 #### Name a promise inside listener
 
 ```javascript
-listen('login', function *() {
+listen('login', function* () {
 	yield name(new Promise(resolve => {
 		...
 	}), 'loginTask')
@@ -103,11 +103,11 @@ listen('login', function* () {
 listener will receive two part of arguments. The first is an object with basic APIs, the second is the arguments emitted with the event. We can use the api `getTaskState` in the first object.
 
 ```javascript
-listen( 'login', name(function* () {
+listen('login', name(function* () {
 	...
 }, 'loginTask'))
 
-listen( 'logout', function*({ getTaskState }) {
+listen('logout', function* ({ getTaskState }) {
   const taskState = getTaskState()
   if( taskState[ 'loginTask' ] === 'pending' ) {
   	throw new Error('your login task is not complete.')
@@ -129,7 +129,7 @@ function* loginCurrentUser({ dispatch }) {
 	dispatch({ type:'update-current-user' })
 }
 
-const loginListener = listen( 'login', name(hello, 'loginTask'))
+const loginListener = listen('login', name(hello, 'loginTask'))
 
 const cancelListener = listen('cancel-login', function* ({ cancel, getTaskState }) {
 	const taskState = getTaskState()
