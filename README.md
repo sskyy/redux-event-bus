@@ -23,7 +23,7 @@ function* loginCurrentUser() {
 	yield new Promise(resolve => setTimeout(resolve, 1000))
 }
 
-const loginListener = listen( 'login', name(loginCurrentUser, 'loginTask'))
+const loginListener = listen('login', name(loginCurrentUser, 'loginTask'))
 ```
 
 ### Step 2: create store with redux-task enhancer
