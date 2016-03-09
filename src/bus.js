@@ -1,5 +1,5 @@
 import { NamedYieldable } from './types'
-import { decorate, partialRight } from './helpers'
+import { decorate } from './helpers'
 import assign from 'object-assign'
 const slice = Array.prototype.slice
 
