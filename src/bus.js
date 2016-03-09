@@ -1,5 +1,5 @@
 import { NamedYieldable } from './types'
-import { decorate } from './helpers'
+import { decorate, partialRight } from './helpers'
 import assign from 'object-assign'
 const slice = Array.prototype.slice
 
@@ -57,20 +57,17 @@ export default class Bus {
   callHandler(handler, ...args) {
     // wrap handler in a generator
     // so handler can be named.
-    return this.co(this.wrapHandler(handler), ...args)
+    return this.co(null, this.wrapHandler(handler), args)
   }
   // learned from co.js, thanks to tj.
-  co(gen, ...args) {
-    const ctx = this
+  co(genTaskName, gen, args ) {
 
-    return new Promise(function (resolve, reject) {
+    return new Promise( (resolve, reject) => {
 
       if (typeof gen === 'function') gen = gen.call(null, ...args)
       if (!gen || typeof gen.next !== 'function') return resolve(gen)
 
-      onFulfilled()
-
-      function onFulfilled(res) {
+      const onFulfilled = (res)=>{
         let ret
         try {
           ret = gen.next(res)
@@ -80,8 +77,7 @@ export default class Bus {
         next(ret)
       }
 
-
-      function onRejected(err) {
+      const  onRejected = (err)=> {
         let ret
         try {
           ret = gen.throw(err)
@@ -91,18 +87,21 @@ export default class Bus {
         next(ret)
       }
 
-      function next(ret) {
+      const next = (ret) => {
         const isValueNameYieldable = isNamedYieldable(ret.value)
         const yieldableName = isValueNameYieldable ? ret.value.name : null
         const retValue = isValueNameYieldable ? ret.value.yieldable : ret.value
+
         // condition 1:  done
         if (ret.done) {
-          if( isValueNameYieldable ) ctx.changeTaskState(yieldableName, FULFILLED_STATE)
+          if( isValueNameYieldable ) this.changeTaskState(yieldableName, FULFILLED_STATE)
           return resolve(retValue)
         }
 
         // condition 2: error
-        const promise = toPromise.call(ctx, retValue, ctx.co, args)
+        const promiseHandler =  isValueNameYieldable ? this.co.bind(this, yieldableName) : this.co.bind(this, null)
+        //const promiseHandler =  this.co
+        const promise = toPromise.call(this, retValue, promiseHandler, args)
 
         if( !promise || !isPromise(promise)) {
           return onRejected(new TypeError(
@@ -111,32 +110,33 @@ export default class Bus {
         }
 
         // condition 3: promise
-        ctx.changeTaskState(yieldableName, PENDING_STATE)
-        let finalPromise
-        if( !isValueNameYieldable ) {
-          // condition 3.1 : without name
-          finalPromise = promise
-        }else {
-          // condition 3.2 : with name
-          // wrap the namedPromise to a new Promise
-          finalPromise =  new Promise((wrappedResolve, wrappedReject)=> {
-            //save the reject method as cancel
-            ctx.cancelHandlers[yieldableName] = wrappedReject
-
-            promise
-              .then(ctx.toCancelable(yieldableName,decorate(
-                ctx.changeTaskState.bind(ctx, yieldableName, FULFILLED_STATE),
-                wrappedResolve
-              )))
-              .catch(ctx.toCancelable(yieldableName,decorate(
-                ctx.changeTaskState.bind(ctx, yieldableName, REJECTED_STATE),
-                wrappedReject
-              )))
-          })
-        }
-
-        return finalPromise.then(onFulfilled,onRejected)
+        this.changeTaskState(yieldableName, PENDING_STATE)
+        let finalPromise = isValueNameYieldable ? this.toCancelablePromise(promise, yieldableName) : promise
+        return finalPromise.then(
+          genTaskName ? this.toCancelable(genTaskName,onFulfilled) : onFulfilled,
+          genTaskName ? this.toCancelable(genTaskName,onRejected) : onRejected)
       }
+
+      // start
+      onFulfilled()
+    })
+  }
+  toCancelablePromise( promise, yieldableName ) {
+    // TODO move changeTaskState out
+
+    return new Promise((wrappedResolve, wrappedReject)=> {
+      //save the reject method as cancel
+      this.cancelHandlers[yieldableName] = wrappedReject
+
+      promise
+        .then(this.toCancelable(yieldableName,decorate(
+          this.changeTaskState.bind(this, yieldableName, FULFILLED_STATE),
+          wrappedResolve
+        )))
+        .catch(this.toCancelable(yieldableName,decorate(
+          this.changeTaskState.bind(this, yieldableName, REJECTED_STATE),
+          wrappedReject
+        )))
     })
   }
   toCancelable( taskName, originCallback) {
@@ -176,7 +176,7 @@ export default class Bus {
 function toPromise(obj, promiseCall, args) {
   if (! obj) return obj
   if (isPromise(obj)) return obj
-  if (isGeneratorFunction(obj) || isGenerator(obj)) return promiseCall.call(this, obj, ...args)
+  if (isGeneratorFunction(obj) || isGenerator(obj)) return promiseCall( obj, args)
   if ('function' == typeof obj) return thunkToPromise.call(this, obj)
   if (Array.isArray(obj)) return arrayToPromise.call(this, obj)
   if (isObject(obj)) return objectToPromise.call(this, obj)

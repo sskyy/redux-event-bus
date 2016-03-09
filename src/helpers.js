@@ -76,3 +76,9 @@ export function shallowEqual(objA, objB) {
 export function flat( arr ) {
   return arr.reduce((a, b)=>a.concat(b),[])
 }
+
+export function partialRight( fn, ...args ) {
+  return function ( ...runtimeArgs ) {
+    return fn(...runtimeArgs, ...args)
+  }
+}

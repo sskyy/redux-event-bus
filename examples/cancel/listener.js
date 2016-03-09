@@ -8,7 +8,7 @@ const PENDING_STATE = 'pending'
 function doSomeAjaxCount() {
   return new Promise((resolve,reject)=>{
     //do some ajax
-    setTimeout(()=>Math.random() > 0.5? resolve({ r:'success' }) : reject({ e:'random error' }) ,2000)
+    setTimeout(()=>Math.random() > 0? resolve({ r:'success' }) : reject({ e:'random error' }) ,2000)
   })
 }
 

@@ -9,6 +9,7 @@
     "check": "npm run lint && npm run test",
     "build": "babel src --out-dir lib",
     "test": "mocha --compilers js:babel/register --recursive",
+    "test:cov": "babel-node $(npm bin)/isparta cover $(npm bin)/_mocha -- --recursive",
     "preversion": "npm run clean && npm run check",
     "version": "npm run build",
     "postversion": "git push && git push --tags && npm run clean && npm run docs:publish",
