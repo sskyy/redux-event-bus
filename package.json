@@ -1,6 +1,6 @@
 {
   "name": "redux-task",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A asynchronous task manager for redux",
   "main": "lib/index.js",
   "scripts": {
