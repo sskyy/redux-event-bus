@@ -25,7 +25,7 @@ export default function monitor(mapStateToProps) {
       }
 
       componentDidMount() {
-        this.unsubscrib = this.bus.onStatusChange(this.handleStatusChange.bind(this))
+        this.unsubscrib = this.bus.onStateChange(this.handleStatusChange.bind(this))
       }
 
       componentWillUnmount() {

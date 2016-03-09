@@ -98,7 +98,7 @@ export default function createEnhancer(listeners) {
       bus.listen(listener)
     })
 
-    bus.onStatusChange(status=>liftedStore.dispatch({ type: ActionTypes.CHANGE_STATUS, payload: status }))
+    bus.onStateChange(status=>liftedStore.dispatch({ type: ActionTypes.CHANGE_STATUS, payload: status }))
 
     return store
 

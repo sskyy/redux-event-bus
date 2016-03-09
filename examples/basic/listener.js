@@ -12,9 +12,10 @@ function doSomeAjaxCount() {
 }
 
 
-export default listen( fromReduxAction(ACTION_ADD_ASYNC), function* thisIsAsyncListener({ dispatch }) {
+export default listen( fromReduxAction(ACTION_ADD_ASYNC), name(function* thisIsAsyncListener({ dispatch }) {
 
-  const { r, e } = yield name(doSomeAjaxCount(), TASK_ADDING)
+  //const { r, e } = yield doSomeAjaxCount()
+  const { r, e } = yield doSomeAjaxCount()
 
   if( e ) {
     dispatch({ type:ACTION_FAILED, payload :r })
@@ -22,4 +23,4 @@ export default listen( fromReduxAction(ACTION_ADD_ASYNC), function* thisIsAsyncL
     dispatch({ type:ACTION_ADD, payload :r })
   }
 
-})
+}, TASK_ADDING))

@@ -7,7 +7,8 @@ export const PENDING_STATE = 'pending'
 export const FULFILLED_STATE = 'resolved'
 export const REJECTED_STATE = 'rejected'
 export const CANCELED_STATE = 'canceled'
-export const CANCELED_ERROR = 'task canceled'
+
+export class CancelException extends Error {}
 
 export default class Bus {
   constructor() {
@@ -27,7 +28,7 @@ export default class Bus {
       ...this.defaultContext,
       cancel : (taskName)=>{
         //TODO check is it cancelable
-        this.cancelHandlers[taskName](CANCELED_ERROR)
+        this.cancelHandlers[taskName](new CancelException(`${taskName} canceled.`))
         this.changeTaskState(taskName,CANCELED_STATE)
       },
       getTaskState : ()=>{
@@ -36,8 +37,21 @@ export default class Bus {
     }
   }
   wrapHandler( handler ) {
+    const computedArgs = this.computeContext()
+
     return function*(...args) {
-      yield handler(...args)
+      // the listener can only be a generator or a named generator
+      if( isNamedYieldable(handler) ) {
+        // bind default args
+        const toYield = new NamedYieldable({
+          name : handler.name,
+          yieldable : handler.yieldable( computedArgs, ...args)
+        })
+
+        yield toYield
+      } else {
+        yield handler( computedArgs, ...args)
+      }
     }
   }
   callHandler(handler, ...args) {
@@ -48,11 +62,10 @@ export default class Bus {
   // learned from co.js, thanks to tj.
   co(gen, ...args) {
     const ctx = this
-    const computedArgs = this.computeContext()
 
     return new Promise(function (resolve, reject) {
 
-      if (typeof gen === 'function') gen = gen.call(ctx, computedArgs, ...args)
+      if (typeof gen === 'function') gen = gen.call(null, ...args)
       if (!gen || typeof gen.next !== 'function') return resolve(gen)
 
       onFulfilled()
@@ -98,33 +111,31 @@ export default class Bus {
         }
 
         // condition 3: promise
+        ctx.changeTaskState(yieldableName, PENDING_STATE)
+        let finalPromise
+        if( !isValueNameYieldable ) {
+          // condition 3.1 : without name
+          finalPromise = promise
+        }else {
+          // condition 3.2 : with name
+          // wrap the namedPromise to a new Promise
+          finalPromise =  new Promise((wrappedResolve, wrappedReject)=> {
+            //save the reject method as cancel
+            ctx.cancelHandlers[yieldableName] = wrappedReject
 
-        if (promise && isPromise(promise)) {
-
-          if( isValueNameYieldable ) {
-            // condition 3.1 : with name
-            ctx.changeTaskState(yieldableName, PENDING_STATE)
-            return new Promise((resolve, reject)=>{
-              //save the reject method as cancel
-              ctx.cancelHandlers[yieldableName] = reject
-
-              const onFulfilledWithStateChange = decorate(ctx.changeTaskState.bind(ctx, yieldableName, FULFILLED_STATE), onFulfilled)
-              const onRejectedWithStateChange = decorate(ctx.changeTaskState.bind(ctx, yieldableName, REJECTED_STATE), onRejected)
-
-              return promise
-                .then(ctx.toCancelable(yieldableName, onFulfilledWithStateChange))
-                .then(ctx.toCancelable(yieldableName, resolve))
-                .catch(decorate(
-                  ctx.toCancelable(yieldableName, onRejectedWithStateChange),
-                  ctx.toCancelable(yieldableName, reject)
-                ))
-
-            })
-          }else {
-            // condition 3.2 : without name
-            return promise.then(onFulfilled,onRejected)
-          }
+            promise
+              .then(ctx.toCancelable(yieldableName,decorate(
+                ctx.changeTaskState.bind(ctx, yieldableName, FULFILLED_STATE),
+                wrappedResolve
+              )))
+              .catch(ctx.toCancelable(yieldableName,decorate(
+                ctx.changeTaskState.bind(ctx, yieldableName, REJECTED_STATE),
+                wrappedReject
+              )))
+          })
         }
+
+        return finalPromise.then(onFulfilled,onRejected)
       }
     })
   }
@@ -140,20 +151,18 @@ export default class Bus {
       handler(this.state)
     })
   }
-  onStatusChange(listener) {
+  onStateChange(listener) {
     this.taskStateListeners.push(listener)
   }
   emit(event, ...args) {
-
-    this.listeners.forEach(listener=> {
-      if (typeof listener.listenTo === 'function') {
-        if (listener.listenTo(event)) {
-          this.callHandler(listener.handler, ...args)
-        }
-      } else if (listener.listenTo === event) {
-        this.callHandler(listener.handler, ...args)
+    return Promise.all(this.listeners.map(listener=> {
+      const matched = (typeof listener.listenTo === 'function') ? listener.listenTo(event) : (listener.listenTo === event)
+      if(matched) {
+        return this.callHandler(listener.handler, ...args)
+      } else {
+        return Promise.resolve(true)
       }
-    })
+    }))
   }
   listen(listener) {
     this.listeners.push(listener)

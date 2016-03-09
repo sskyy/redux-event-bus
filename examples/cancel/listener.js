@@ -1,10 +1,9 @@
-import { listen, name, fromReduxAction } from 'redux-task/util'
-//import r from 'redux-task'
-//console.log(r.fromReduxAction)
+import { listen, name, fromReduxAction } from 'redux-task'
 import { ACTION_ADD_ASYNC, ACTION_ADD, ACTION_FAILED, ACTION_CANCEL } from './reducer'
-import { PENDING_STATE } from 'redux-task/bus'
 
 export const TASK_ADDING = 'adding'
+
+const PENDING_STATE = 'pending'
 
 function doSomeAjaxCount() {
   return new Promise((resolve,reject)=>{
@@ -13,10 +12,9 @@ function doSomeAjaxCount() {
   })
 }
 
+export const addListener =  listen( fromReduxAction(ACTION_ADD_ASYNC), name(function* thisIsAsyncListener({ dispatch }) {
 
-export const addListener =  listen( fromReduxAction(ACTION_ADD_ASYNC), function* thisIsAsyncListener({ dispatch }) {
-
-  const { r, e } = yield name(doSomeAjaxCount(), TASK_ADDING)
+  const { r, e } = yield doSomeAjaxCount()
 
   if( e ) {
     dispatch({ type:ACTION_FAILED, payload :r })
@@ -24,8 +22,7 @@ export const addListener =  listen( fromReduxAction(ACTION_ADD_ASYNC), function*
     dispatch({ type:ACTION_ADD, payload :r })
   }
 
-})
-
+}, TASK_ADDING))
 
 export const cancelListener =  listen( fromReduxAction(ACTION_CANCEL), function* thisWillCancel({ getTaskState, cancel }) {
   if( getTaskState()[TASK_ADDING] ===  PENDING_STATE ) {

@@ -4,9 +4,15 @@
   "description": "A asynchronous task manager for redux",
   "main": "lib/index.js",
   "scripts": {
-    "lint": "eslint src",
+    "clean": "rimraf",
+    "lint": "eslint src test",
     "check": "npm run lint && npm run test",
-    "build": "babel src --out-dir lib"
+    "build": "babel src --out-dir lib",
+    "test": "mocha --compilers js:babel/register --recursive",
+    "preversion": "npm run clean && npm run check",
+    "version": "npm run build",
+    "postversion": "git push && git push --tags && npm run clean && npm run docs:publish",
+    "prepublish": "npm run clean && npm run build"
   },
   "repository": {},
   "keywords": [],

@@ -1,7 +1,12 @@
 # redux-task
 
-[Documents](http://sskyy.github.io/redux-task).   
-A Side Effects manager for redux. The idea is really simple : we give an asynchronous task(such as fetch data from server) a name, then we can use the name to get the state of the task or cancel it if we want. You will no longger need to set state like `isSubmitting` to indicate asynchronous action state.
+
+[![build status](https://img.shields.io/travis/sskyy/redux-task/master.svg?style=flat-square)](https://travis-ci.org/sskyy/redux-task)
+[![npm version](https://img.shields.io/npm/v/redux-task.svg?style=flat-square)](https://www.npmjs.com/package/redux-task)
+
+[Documents](http://sskyy.github.io/redux-task).
+A Side Effects manager for redux. The idea is really simple : we give an asynchronous task(such as fetch data from server) a name, then we can use the name to get the state of the task or cancel it if we want. You will no longer need to set state like `isSubmitting` to indicate asynchronous action state.
+
 
 ## 1. Quick Start
 
@@ -11,11 +16,11 @@ A listener is a generator which will be called when a certain **event** is emitt
 
 
 ```javascript
-import {listen, name} from 'redux-task'
+import { listen, name } from 'redux-task'
 
-function* loginCurrentUser(){
+function* loginCurrentUser() {
 	// mimic ajax
-	yield new Promise(resolve=>setTimeout(resolve, 1000))
+	yield new Promise(resolve => setTimeout(resolve, 1000))
 
 }
 
@@ -30,7 +35,7 @@ Then we can create our store:
 ```javascript
 import {createEnhancer} from 'redux-task'
 
-const store = createStore(reducer, {}, createEnhancer([loginListener]));
+const store = createStore(reducer, {}, createEnhancer([ loginListener ]));
 ```
   
 
@@ -41,18 +46,18 @@ Finally, let's see how to emit a event, and how to get the state of the yield ta
 ```javascript
 import {monitor} from 'redux-task'
 
-const App = (props)=>{
+const App = (props) => {
 	return (
 		<div>
-			<button onClick={()=>props.emit('login')}>click</button>
-			<div>state of helloTask:{this.props.loginTask}</div>
+			<button onClick={ () => props.emit('login') }>click</button>
+			<div>state of helloTask: { this.props.loginTask }</div>
 		</div>
 	)
 }
 
 function mapTaskStateToProps(state){
 	return {
-		loginTask : state.loginTask
+		loginTask: state.loginTask
 	}
 }
 
@@ -78,9 +83,9 @@ listen( 'login', name(function*(){
 #### Name a promise inside listener
 
 ```javascript
-listen('login', function *(){
+listen('login', function *() {
 
-	yield name(new Promise(resolve=>{
+	yield name(new Promise(resolve => {
 		...
 	}), 'loginTask')
 })
@@ -89,9 +94,9 @@ listen('login', function *(){
 #### Name a generator inside listener
 
 ```javascript
-listen('login', function *(){
+listen('login', function* () {
 
-	yield name(function*(){
+	yield name(function* () {
 		...
 	}), 'loginTask')
 })
@@ -99,17 +104,17 @@ listen('login', function *(){
 
 ### 2.2 Get task state in listener
 
-listener will receive two part of arguments. The first is an object with basic apis, the second is the arguments emitted with the event. We can use the api `getTaskState` in the first object.
+listener will receive two part of arguments. The first is an object with basic APIs, the second is the arguments emitted with the event. We can use the api `getTaskState` in the first object.
 
 ```javascript
-listen( 'login', name(function*(){
+listen( 'login', name(function* () {
 	...
 }, 'loginTask'))
 
-listen( 'logout', function*({getTaskState}){
+listen( 'logout', function*({ getTaskState }) {
 
   const taskState = getTaskState()
-  if( taskState['loginTask'] === 'pending' ){
+  if( taskState[ 'loginTask' ] === 'pending' ) {
   	throw new Error('your login task is not complete.')
   }
 })
@@ -120,28 +125,27 @@ listen( 'logout', function*({getTaskState}){
 Let's still use our example above. Let's say our use submitted the login form, and quickly click the cancel button.
 
 ```javascript
-import {listen, name} from 'redux-task'
+import { listen, name } from 'redux-task'
 
-function* loginCurrentUser({dispatch}){
+function* loginCurrentUser({ dispatch }) {
 	// mimic ajax
-	yield new Promise(resolve=>setTimeout(resolve, 1000))
+	yield new Promise(resolve => setTimeout(resolve, 1000))
 	// if canceled in time, this action will not be dispatched
-	dispatch({type:'update-current-user'})
+	dispatch({ type:'update-current-user' })
 
 }
 
 const loginListener = listen( 'login', name(hello, 'loginTask'))
 
-
-const cancelListener = listen('cancel-login', function*({cancel, getTaskState}){
+const cancelListener = listen('cancel-login', function* ({ cancel, getTaskState }) {
 	const taskState = getTaskState()
-	if( taskState['loginTask'] === 'pending' ) cancel('loginTask') 
+	if( taskState[ 'loginTask' ] === 'pending' ) cancel('loginTask')
 })
 ```
 
 ## 3. Examples
 
-Examples can be found in the `examples` folder. More docs and example comming soon.
+Examples can be found in the `examples` folder. More docs and example coming soon.
 
 ## 4. License
 
