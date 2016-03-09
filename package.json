@@ -4,7 +4,7 @@
   "description": "A asynchronous task manager for redux",
   "main": "lib/index.js",
   "scripts": {
-    "clean": "rimraf",
+    "clean": "rimraf lib",
     "lint": "eslint src test",
     "check": "npm run lint && npm run test",
     "build": "babel src --out-dir lib",
