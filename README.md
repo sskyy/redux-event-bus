@@ -21,11 +21,9 @@ import { listen, name } from 'redux-task'
 function* loginCurrentUser() {
 	// mimic ajax
 	yield new Promise(resolve => setTimeout(resolve, 1000))
-
 }
 
 const loginListener = listen( 'login', name(loginCurrentUser, 'loginTask'))
-
 ```
 
 ### Step 2: create store with redux-task enhancer
@@ -33,7 +31,7 @@ const loginListener = listen( 'login', name(loginCurrentUser, 'loginTask'))
 Then we can create our store:
 
 ```javascript
-import {createEnhancer} from 'redux-task'
+import { createEnhancer } from 'redux-task'
 
 const store = createStore(reducer, {}, createEnhancer([ loginListener ]));
 ```
@@ -44,7 +42,7 @@ const store = createStore(reducer, {}, createEnhancer([ loginListener ]));
 Finally, let's see how to emit a event, and how to get the state of the yield task. We will use api `monitor` to wrap our component. The usage is quite similar as redux api `connect`. It takes a function to map task state to props. And monitor will pass an aditional method called `emit` to your component, so you can use it to emit evemt.
 
 ```javascript
-import {monitor} from 'redux-task'
+import { monitor } from 'redux-task'
 
 const App = (props) => {
 	return (
@@ -84,7 +82,6 @@ listen( 'login', name(function*(){
 
 ```javascript
 listen('login', function *() {
-
 	yield name(new Promise(resolve => {
 		...
 	}), 'loginTask')
@@ -95,7 +92,6 @@ listen('login', function *() {
 
 ```javascript
 listen('login', function* () {
-
 	yield name(function* () {
 		...
 	}), 'loginTask')
@@ -112,7 +108,6 @@ listen( 'login', name(function* () {
 }, 'loginTask'))
 
 listen( 'logout', function*({ getTaskState }) {
-
   const taskState = getTaskState()
   if( taskState[ 'loginTask' ] === 'pending' ) {
   	throw new Error('your login task is not complete.')
@@ -132,7 +127,6 @@ function* loginCurrentUser({ dispatch }) {
 	yield new Promise(resolve => setTimeout(resolve, 1000))
 	// if canceled in time, this action will not be dispatched
 	dispatch({ type:'update-current-user' })
-
 }
 
 const loginListener = listen( 'login', name(hello, 'loginTask'))
