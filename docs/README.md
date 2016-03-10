@@ -9,7 +9,7 @@
   - [Name](/docs/usage/Name.md)
   - [Query Task State](/docs/usage/Query_Task_State.md)
   - [Cancel](/docs/usage/Cancel.md)
-  - [With React](/docs/usage/With_React)
-* Examples
+  - [With React](/docs/usage/With_React.md)
+* [Examples](/docs/examples/README.md)
 * [API reference](/docs/api/API.md)
 

@@ -25,7 +25,7 @@ export const addListener =  listen( fromReduxAction(ACTION_ADD_ASYNC), name(func
 }, TASK_ADDING))
 
 export const cancelListener =  listen( fromReduxAction(ACTION_CANCEL), function* thisWillCancel({ getTaskState, cancel }) {
-  if( getTaskState()[TASK_ADDING] ===  PENDING_STATE ) {
+  if( getTaskState(TASK_ADDING) ===  PENDING_STATE ) {
     cancel(TASK_ADDING)
   }
 })
