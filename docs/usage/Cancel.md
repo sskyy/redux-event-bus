@@ -1,34 +1,35 @@
 # 1. Listen to a event
 
-There to ways to listen to match a  event you want to listen. First, use string as the name of event.
+There are two ways to listen to a event you want to listen. First, use string as the name of event.
 
 ```javascript
-listen('login', function *(){})
+listen('login', function* () {})
 ```
 
 Second, use a function which returns a bool to match event.
 
 ```javascript
-listen(function(event){
+listen(function (event) {
   return  event === 'login'
-}, function *(){})
+}, function* () {})
 ```
 
 # 2. Listen to a redux action
 
-Actually, when a action is dispatched, the action will be emit as event also. So we can use a function to match actions we want.
+Actually, when a action is dispatched, the action will be emit as event also. So we can use a function to match actions.
 
  ```javascript
  listen(function(action){
    return  action.type && action.type=== 'some-redux-action-type'
- }, function *(){})
+ }, function* (){})
  ```
 
  or use a helper function to match certain action type.
 
  ```javascript
- listen( fromReduxAction('some-redux-action-type'), function *(){
- })
+ import { fromReduxAction } from 'redux-task'
+ 
+ listen( fromReduxAction('some-redux-action-type'), function* () {})
  ```
 
 # 3. Name a task
@@ -38,7 +39,7 @@ Nearly anything synchronous can be named as task, event a event listener.
 ## 3.1 Name  listener as task
 
 ```javascript
-listen( 'login', name(function*(){
+listen('login', name(function* () {
 	...
 }, 'loginTask'))
 
@@ -47,9 +48,8 @@ listen( 'login', name(function*(){
 ## 3.2 Name a promise inside listener
 
 ```javascript
-listen('login', function *(){
-
-	yield name(new Promise(resolve=>{
+listen('login', function* () {
+	yield name(new Promise(resolve => {
 		...
 	}), 'loginTask')
 })
@@ -58,9 +58,8 @@ listen('login', function *(){
 ## 3.3 Name a generator inside listener
 
 ```javascript
-listen('login', function *(){
-
-	yield name(function*(){
+listen('login', function* () {
+	yield name(function* () {
 		...
 	}), 'loginTask')
 })
@@ -71,14 +70,14 @@ listen('login', function *(){
 listener will receive two part of arguments. The first is an object with basic APIs, the second is the arguments emitted with the event. We can use the api `getTaskState` in the first object.
 
 ```javascript
-listen( 'login', name(function*(){
+listen('login', name(function* () {
 	...
 }, 'loginTask'))
 
-listen( 'logout', function*({getTaskState}){
+listen('logout', function* ({ getTaskState }) {
 
   const taskState = getTaskState()
-  if( taskState['loginTask'] === 'pending' ){
+  if( taskState[ 'loginTask' ] === 'pending' ) {
   	throw new Error('your login task is not complete.')
   }
 })
@@ -89,20 +88,20 @@ listen( 'logout', function*({getTaskState}){
 Let's say our use submitted a  login form, and quickly click the cancel button. We will have two event listener, one listens to event `login`, and the other listens to `cancel-login`.
 
 ```javascript
-import {listen, name} from 'redux-task'
+import { listen, name } from 'redux-task'
 
-function* loginCurrentUser({dispatch}){
+function* loginCurrentUser({ dispatch }) {
 	// mimic ajax
-	yield new Promise(resolve=>setTimeout(resolve, 1000))
+	yield new Promise(resolve => setTimeout(resolve, 1000))
 
 	// if canceled in time, this action will not be dispatched
 	dispatch({type:'update-current-user'})
 }
 
-const loginListener = listen( 'login', name(hello, 'loginTask'))
+const loginListener = listen('login', name(hello, 'loginTask'))
 
-const cancelListener = listen('cancel-login', function*({cancel, getTaskState}){
+const cancelListener = listen('cancel-login', function* ({ cancel, getTaskState }) {
 	const taskState = getTaskState()
-	if( taskState['loginTask'] === 'pending' ) cancel('loginTask')
+	if( taskState[ 'loginTask' ] === 'pending' ) cancel('loginTask')
 })
 ```

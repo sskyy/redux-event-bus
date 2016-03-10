@@ -9,7 +9,10 @@ function getDisplayName(WrappedComponent) {
   return WrappedComponent.displayName || WrappedComponent.name || 'Component'
 }
 
-export default function monitor(mapStateToProps) {
+export default function monitor(mapStateToProps, mapEmitToProps) {
+
+  const finalMapEmitToProps = mapEmitToProps || ( emit => { return { emit } } )
+
   return function (WrappedComponent) {
 
     class MonitorComponent extends Component {
@@ -23,9 +26,14 @@ export default function monitor(mapStateToProps) {
           throw new Error('Did you forget to use enhancer to create store?')
         }
         this.bus = context.store.liftedStore.bus
-        const groupState = assign({}, this.bus.state)
+        const groupState = { ...this.bus.state }
         delete groupState[DEFAULT_GROUP_NAME]
-        this.state = { taskState: mapStateToProps(this.bus.state[DEFAULT_GROUP_NAME], groupState)  }
+
+        this.state = {
+          taskState: mapStateToProps(
+            { ...this.bus.state[DEFAULT_GROUP_NAME] }, { ...groupState }
+          )
+        }
       }
 
       componentDidMount() {
@@ -37,12 +45,14 @@ export default function monitor(mapStateToProps) {
       }
 
       handleStatusChange(state) {
-        const groupState = assign({}, state)
+        const groupState = { ...state }
         delete groupState[DEFAULT_GROUP_NAME]
-        const newMappedStatus = mapStateToProps(state[DEFAULT_GROUP_NAME], groupState)
-        if (! shallowEqual(newMappedStatus, this.state.taskState)) {
+        const newMappedStates = mapStateToProps( { ...state[DEFAULT_GROUP_NAME] }, { ...groupState })
+        if (! shallowEqual(newMappedStates, this.state.taskState)) {
           this.hasStatusChanged = true
-          this.setState({ taskState: newMappedStatus })
+          this.setState({ taskState: newMappedStates })
+        }else {
+          console.log('every task is the same', newMappedStates, this.state.taskState)
         }
       }
 
@@ -53,7 +63,12 @@ export default function monitor(mapStateToProps) {
       render() {
         this.haveOwnPropsChanged = false
         this.hasStatusChanged = false
-        return createElement(WrappedComponent, { ...this.state.taskState, ...this.props })
+
+        console.log('reRender')
+
+        const emitProps = finalMapEmitToProps(this.bus.emit.bind(this.bus))
+
+        return createElement(WrappedComponent, { ...this.state.taskState, ...this.props, ...emitProps })
 
       }
     }

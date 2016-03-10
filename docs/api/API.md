@@ -1,17 +1,17 @@
-# API
 
-## listen( event, handler )
+# `listen(event, handler)`  
 
-### Arguments
+
+#### Arguments
 
  - event(String|Function) : use a string or a function to match certain event.
  - handler(Generator) : code will be executed when event match. listener will receive two part of arguments. The first is an object with basic APIs, the second is the arguments emitted with the event.
 
-### Returns
+#### Returns
 
 EventHandler: internal data structure.
 
-### Examples
+#### Examples
 
 ```javascript
 listen('login', function *(){})
@@ -42,26 +42,26 @@ Actually, when a action is dispatched, the action will be emit as event also. So
  })
  ```
 
- ## name( asynchronousAction, name )
+# `name( asynchronousAction, name )`
 
- ### Arguments
+#### Arguments
 
   - asynchronousAction(Generator|Promise|Function) : Internally we use **co.js** like machanism to handle asynchronous code. So, you can name anything can be yield by co.
   - name(String) : unique name of the task.
 
- ### Returns
+#### Returns
 
  Internal data structure.
 
-## getTaskState()
+# `getTaskState(taskName)`
 
 This api can only be achieved in listener. Task have three state: **pending**, **fulfilled** and **rejected**.
 
-### Returns
+#### Returns
 
 An Object contains all tasks with state.
 
-### Example
+#### Example
 
 ```javascript
 listen('login', function *({getTaskState}){
@@ -71,15 +71,19 @@ listen('login', function *({getTaskState}){
 })
 ```
 
-## cancel(name)
+# `getTask()`
 
-## Arguments
+# `getGroupTaskState()`
+
+# `cancel(name)`
+
+#### Arguments
 
  - name(String) : The name of task to cancel.
 
 This api can only be achieved in listener.
 
-### Example
+#### Example
 
 ```javascript
 listen('login', function *({cancel, getTaskState}){
@@ -89,11 +93,11 @@ listen('login', function *({cancel, getTaskState}){
 })
 ```
 
-## dispatch()
+# `dispatch()`
 
 The same as redux dispatch method. This api can only be achieved in listener.
 
-### Example
+#### Example
 
 ```javascript
 listen('login', function *({dispatch}){
@@ -101,11 +105,11 @@ listen('login', function *({dispatch}){
 })
 ```
 
-## getState()
+# `getState()`
 
 The same as redux getState method. This api can only be achieved in listener.
 
-### Example
+#### Example
 
 ```javascript
 listen('login', function *({getState}){

@@ -1,24 +1,15 @@
 import 'babel-polyfill'
 import React from 'react'
 import { render } from 'react-dom'
-import App from './App'
-import { Provider } from 'react-redux'
-import { createStore, compose } from 'redux'
-import { createEnhancer } from 'redux-task'
-import countListener from './listener'
-import reducer from './reducer'
-
-// store
-const enhancer = compose(
-  window.devToolsExtension ? window.devToolsExtension() : f => f,
-  createEnhancer([ countListener ])
-)
-
-const store = createStore(reducer, {}, enhancer)
+import ReduxTask from './redux-task'
+import ReduxThunk from './redux-thunk'
 
 render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
+  <div>
+    <h1>Redux Thunk</h1>
+    <ReduxThunk />
+    <h1>Redux Task</h1>
+    <ReduxTask />
+  </div>,
   document.getElementById('root')
 )

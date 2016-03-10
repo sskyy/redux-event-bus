@@ -5,7 +5,7 @@ import assign from 'object-assign'
 const slice = Array.prototype.slice
 
 export const PENDING_STATE = 'pending'
-export const FULFILLED_STATE = 'resolved'
+export const FULFILLED_STATE = 'fulfilled'
 export const REJECTED_STATE = 'rejected'
 export const CANCELED_STATE = 'canceled'
 

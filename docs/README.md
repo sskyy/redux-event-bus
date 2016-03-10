@@ -1,10 +1,14 @@
 ## Table of Contents
 
 * [Get Started](/docs/introduction/README.md)
-  - [Quick Start](/docs/introduction/Quick_Start.md)
+  - [Beginner Tutorial](/docs/introduction/Beginner_Tutorial.md)
   - [Thoughts Behind Code](/docs/introduction/Thoughts_Behind_Code.md)
+  - [Concepts](/docs/introduction/Concepts.md)
 * [Usage](/docs/usage/README.md)
-  - [Basic](/docs/usage/Basic.md)
-  - [Dynamic Task Name](/docs/usage/Dynamic_Task_Name.md)
-* [API](/docs/api/API.md)
+  - [Listen](/docs/usage/Listen.md)
+  - [Name](/docs/usage/Name.md)
+  - [Cancel](/docs/usage/Cancel.md)
+  - [With React](/docs/usage/With_React)
+* Examples
+* [API reference](/docs/api/API.md)
 
