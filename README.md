@@ -115,6 +115,12 @@ const MonitorApp = monitor(task => { return { task } })(App)
 
 Code can be found here: [https://github.com/sskyy/redux-task/examples/basic](https://github.com/sskyy/redux-task/examples/basic).
 
+## Why Another Side Effects Library?
+
+ - Save your time to create state for async actions.
+ - Generator and Promise are perfect for async flow control. Advanced scenario like **cancel a async action** can be handled easily. See [example](https://github.com/sskyy/redux-task/tree/master/examples). Thanks redux-saga for the thought.
+ - It's much intuitive than competitors.
+
 ## License
 
 MIT

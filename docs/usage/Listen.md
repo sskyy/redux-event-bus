@@ -1,6 +1,6 @@
 #  Listen to a event
 
-There are two ways to listen to a event. First, use string as the name of event.
+There are two ways to listen to a event. First, use string to match the name of the event.
 
 ```javascript
 listen('login', function* () {})
@@ -16,7 +16,7 @@ listen(function (event) {
 
 #  Listen to a redux action
 
-Actually, when a action is dispatched, the action will be emit as event also. So we can use a function to match actions.
+Actually, when a redux action is dispatched, the action will be emit as event also. So we can use a function to match actions.
 
  ```javascript
  listen(function(action){
