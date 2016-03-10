@@ -7,6 +7,7 @@
 * [Usage](/docs/usage/README.md)
   - [Listen](/docs/usage/Listen.md)
   - [Name](/docs/usage/Name.md)
+  - [Query Task State](/docs/usage/Query_Task_State.md)
   - [Cancel](/docs/usage/Cancel.md)
   - [With React](/docs/usage/With_React)
 * Examples

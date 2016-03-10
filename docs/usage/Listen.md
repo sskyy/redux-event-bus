@@ -1,4 +1,4 @@
-# 1. Listen to a event
+#  Listen to a event
 
 There are two ways to listen to a event. First, use string as the name of event.
 
@@ -14,7 +14,7 @@ listen(function (event) {
 }, function* () {})
 ```
 
-# 2. Listen to a redux action
+#  Listen to a redux action
 
 Actually, when a action is dispatched, the action will be emit as event also. So we can use a function to match actions.
 

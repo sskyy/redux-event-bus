@@ -20,35 +20,40 @@ Let's compare the solution between `redux-thunk` and `redux-task`.
 
 ```javascript
 function reducer(state, action) {
-	switch(action.type) {
-		case 'START':
-			return { 
-				disabled: true,
-				result: ''
-			}
-		case 'SUCCESS':
-			return {
-				disabled: false,
-				result: 'success'
-			}
-		case 'FAILED':
-			return { 
-				disabled: false,
-				result: 'failed'
-			}
-	}
+  switch(action.type) {
+    case 'START':
+      return {
+        disabled: true,
+        result: ''
+      }
+    case 'SUCCESS':
+      return {
+        disabled: false,
+        result: 'success'
+      }
+    case 'FAILED':
+      return {
+        disabled: false,
+        result: 'failed'
+      }
+    default:
+      return {
+        disabled: false,
+        result: ''
+      }
+  }
 }
 ```
 
 **action.js**
 
 ```javascript
-export function start(dispatch) {
+function start(dispatch) {
 
-	dispatch({ type: 'START' })
-	return fetch('data_url')
-		.then(() => dispatch({ type: 'SUCCESS' }))
-		.catch(() => dispatch({ type: 'FAILED' }))
+  dispatch({ type: 'START' })
+  return fetch('data_url')
+    .then(() => dispatch({ type: 'SUCCESS' }))
+    .catch(() => dispatch({ type: 'FAILED' }))
 
 }
 ```
@@ -56,19 +61,18 @@ export function start(dispatch) {
 **component.js**
 
 ```javascript
-import { start } from './action'
-
-const APP = (props) => (
-	<div>
-		<button 
-			click={ () => props.dispatch(start) disabled={ props.disabled }}
-		>
-		</button>
-		<span>{ props.result }</span>
-	</div>
+const App = (props) => (
+  <div>
+    <button
+      onClick={ () => props.dispatch(start) } disabled={ props.disabled }
+    >click
+    </button>
+    <span>{ props.result }</span>
+  </div>
 )
 
-export default connect(f => f)(APP)
+
+const ConnectedApp = connect(f => f)(App)
 ```
 
 ### redux-task
