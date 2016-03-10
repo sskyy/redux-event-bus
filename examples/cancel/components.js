@@ -28,9 +28,10 @@ export const Message = connect(f=>f)(
 )
 
 
-function mapPromiseToState(status) {
+function mapPromiseToState(state) {
+  console.log( state )
   return {
-    addingState : status[TASK_ADDING]
+    addingState : state[TASK_ADDING]
   }
 }
 

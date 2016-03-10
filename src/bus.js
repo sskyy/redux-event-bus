@@ -1,6 +1,6 @@
 import { NamedYieldable } from './types'
-import { decorate } from './helpers'
-import assign from 'object-assign'
+import { DEFAULT_GROUP_NAME } from './util'
+import { decorate, result } from './helpers'
 const slice = Array.prototype.slice
 
 export const PENDING_STATE = 'pending'
@@ -9,12 +9,15 @@ export const REJECTED_STATE = 'rejected'
 export const CANCELED_STATE = 'canceled'
 
 export class CancelException extends Error {}
+export class TaskNameConflict extends Error {}
 
 export default class Bus {
   constructor() {
     this.listeners = []
     //save status
-    this.state = {}
+    this.state = {
+      [DEFAULT_GROUP_NAME] : {}
+    }
     this.cancelHandlers = {}
     this.taskStateListeners = []
     this.defaultContext = {}
@@ -26,13 +29,33 @@ export default class Bus {
   computeContext() {
     return {
       ...this.defaultContext,
-      cancel : (taskName)=>{
+      cancel : (name)=>{
         //TODO check is it cancelable
-        this.cancelHandlers[taskName](new CancelException(`${taskName} canceled.`))
-        this.changeTaskState(taskName,CANCELED_STATE)
+        this.cancelHandlers[DEFAULT_GROUP_NAME][name](new CancelException(`${name} canceled.`))
+
+        const nameContext = {
+          name,
+          group : DEFAULT_GROUP_NAME
+        }
+
+        this.changeTaskState(nameContext,CANCELED_STATE)
       },
-      getTaskState : ()=>{
-        return assign({}, this.state)
+      cancelGroupTask:(group, name)=>{
+        this.cancelHandlers[group][name](new CancelException(`${name} canceled.`))
+        const nameContext = { name,group }
+        this.changeTaskState(nameContext,CANCELED_STATE)
+      },
+      getTaskState: (name)=>{
+        return this.state[DEFAULT_GROUP_NAME][name]
+      },
+      getGroupTaskState:(group, name)=>{
+        return this.state[group][name]
+      },
+      getTask:()=>{
+        return this.state[DEFAULT_GROUP_NAME]
+      },
+      getTaskGroup:(group)=>{
+        return this.state[group]
       }
     }
   }
@@ -45,7 +68,8 @@ export default class Bus {
         // bind default args
         const toYield = new NamedYieldable({
           name : handler.name,
-          yieldable : handler.yieldable( computedArgs, ...args)
+          yieldable : handler.yieldable( computedArgs, ...args),
+          group : handler.group
         })
 
         yield toYield
@@ -60,7 +84,7 @@ export default class Bus {
     return this.co(null, this.wrapHandler(handler), args)
   }
   // learned from co.js, thanks to tj.
-  co(genTaskName, gen, args ) {
+  co(genNameContext, gen, args ) {
 
     return new Promise( (resolve, reject) => {
 
@@ -89,63 +113,85 @@ export default class Bus {
 
       const next = (ret) => {
         const isValueNameYieldable = isNamedYieldable(ret.value)
-        const yieldableName = isValueNameYieldable ? ret.value.name : null
+        const nameContext = {
+          name: isValueNameYieldable ? result(ret.value.name) : null,
+          group: isValueNameYieldable ? ret.value.group : null
+        }
         const retValue = isValueNameYieldable ? ret.value.yieldable : ret.value
 
         // condition 1:  done
         if (ret.done) {
-          if( isValueNameYieldable ) this.changeTaskState(yieldableName, FULFILLED_STATE)
+          if( isValueNameYieldable ) this.changeTaskState(nameContext, FULFILLED_STATE)
           return resolve(retValue)
         }
 
-        // condition 2: error
-        const promiseHandler =  isValueNameYieldable ? this.co.bind(this, yieldableName) : this.co.bind(this, null)
-        //const promiseHandler =  this.co
+        // condition 2: promise
+        if( isValueNameYieldable ) this.checkPendingConflict(nameContext)
+
+        const promiseHandler =  isValueNameYieldable ? this.co.bind(this, nameContext) : this.co.bind(this, null)
         const promise = toPromise.call(this, retValue, promiseHandler, args)
 
+        // condition 2.1: promise error
         if( !promise || !isPromise(promise)) {
           return onRejected(new TypeError(
             `You may only yield a function, promise, generator, array, or object, but the following object was passed: "${String(ret.value)}"`
           ))
         }
 
-        // condition 3: promise
-        this.changeTaskState(yieldableName, PENDING_STATE)
-        let finalPromise = isValueNameYieldable ? this.toCancelablePromise(promise, yieldableName) : promise
+        // condition 2.2: promise
+        if( isValueNameYieldable ) this.changeTaskState(nameContext, PENDING_STATE)
+        let finalPromise = isValueNameYieldable ? this.toCancelablePromise(promise, nameContext) : promise
         return finalPromise.then(
-          genTaskName ? this.toCancelable(genTaskName,onFulfilled) : onFulfilled,
-          genTaskName ? this.toCancelable(genTaskName,onRejected) : onRejected)
+          genNameContext ? this.toCancelable(genNameContext,onFulfilled) : onFulfilled,
+          genNameContext ? this.toCancelable(genNameContext,onRejected) : onRejected)
       }
 
       // start
       onFulfilled()
     })
   }
-  toCancelablePromise( promise, yieldableName ) {
-    // TODO move changeTaskState out
+  checkPendingConflict( nameContext ) {
+    if( (this.state[nameContext.group] !== undefined) && (this.state[nameContext.group][nameContext] === PENDING_STATE ) ) {
+      const message = nameContext.group === DEFAULT_GROUP_NAME ?
+          `task ${nameContext.name} is already running, if your task can be parallel, use 'nameGroup' to name your task`:
+          `task ${nameContext.name} of group ${nameContext.group} is already running.`
 
+      throw new TaskNameConflict(message)
+    }
+  }
+  toCancelablePromise( promise, nameContext ) {
+    // TODO move changeTaskState out
     return new Promise((wrappedResolve, wrappedReject)=> {
       //save the reject method as cancel
-      this.cancelHandlers[yieldableName] = wrappedReject
+      if( this.cancelHandlers[nameContext.group] === undefined ) this.cancelHandlers[nameContext.group] = {}
+      this.cancelHandlers[nameContext.group][nameContext.name] = wrappedReject
 
       promise
-        .then(this.toCancelable(yieldableName,decorate(
-          this.changeTaskState.bind(this, yieldableName, FULFILLED_STATE),
+        .then(this.toCancelable(nameContext,decorate(
+          this.changeTaskState.bind(this, nameContext, FULFILLED_STATE),
           wrappedResolve
         )))
-        .catch(this.toCancelable(yieldableName,decorate(
-          this.changeTaskState.bind(this, yieldableName, REJECTED_STATE),
+        .catch(this.toCancelable(nameContext,decorate(
+          this.changeTaskState.bind(this, nameContext, REJECTED_STATE),
           wrappedReject
         )))
     })
   }
-  toCancelable( taskName, originCallback) {
+  toCancelable( nameContext, originCallback) {
     return (res)=>{
-      return (this.state[taskName] !== CANCELED_STATE) && originCallback(res)
+
+      if((this.state[nameContext.group] !== undefined) && (this.state[nameContext.group][nameContext.name] === CANCELED_STATE)) {
+        return false
+      }else {
+        return originCallback(res)
+      }
     }
   }
-  changeTaskState(taskName, status) {
-    this.state[taskName] = status
+  changeTaskState(nameContext, state) {
+    if( this.state[nameContext.group] === undefined ) {
+      this.state[nameContext.group] = {}
+    }
+    this.state[nameContext.group][nameContext.name] = state
     // TODO sync by default, async by option
     this.taskStateListeners.forEach(handler=>{
       handler(this.state)

@@ -1,8 +1,11 @@
-import assign from 'object-assign'
 
 export class Type {
   constructor( data ) {
-    assign(this,  data)
+    for( let i in data ) {
+      if( data.hasOwnProperty(i)) {
+        this[i] = data[i]
+      }
+    }
   }
 }
 

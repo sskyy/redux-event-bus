@@ -82,3 +82,7 @@ export function partialRight( fn, ...args ) {
     return fn(...runtimeArgs, ...args)
   }
 }
+
+export function result( fn ) {
+  return ( typeof fn === 'function' ) ? fn() : fn
+}
