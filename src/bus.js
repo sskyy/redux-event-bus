@@ -1,6 +1,7 @@
 import { NamedYieldable } from './types'
 import { DEFAULT_GROUP_NAME } from './util'
 import { decorate, result } from './helpers'
+import assign from 'object-assign'
 const slice = Array.prototype.slice
 
 export const PENDING_STATE = 'pending'
@@ -55,7 +56,9 @@ export default class Bus {
         return this.state[DEFAULT_GROUP_NAME]
       },
       getTaskGroup:(group)=>{
-        return this.state[group]
+        const groups = assign({}, this.state)
+        delete groups[DEFAULT_GROUP_NAME]
+        return group ? groups[group] : groups
       }
     }
   }

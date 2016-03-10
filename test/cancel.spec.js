@@ -1,12 +1,14 @@
 import expect from 'expect'
-import { name, listen } from '../src/index'
+import { name, nameGroup, listen } from '../src/index'
 import { PENDING_STATE, CANCELED_STATE, CancelException } from '../src/bus'
+import { DEFAULT_GROUP_NAME } from '../src/util'
 import Bus from '../src/bus'
 
 
 describe('cancel', () => {
   let bus
   let taskState = {}
+  const groupName = 'delay'
   const taskName = 'delay100'
   const eventName = 'some cool event'
   const waitTime = 100
@@ -38,7 +40,36 @@ describe('cancel', () => {
     }))
 
 
-    expect(taskState[taskName]).toBe(undefined)
+    const promise = bus.emit(eventName)
+    // delay is important
+    // emit will not always  change state immediately
+
+    Promise.all([
+      delay(checkTime).then(() => {
+        expect(taskState[DEFAULT_GROUP_NAME][taskName]).toBe(PENDING_STATE)
+        bus.emit(cancelEvent)
+      }),
+      promise
+    ]).then(done.bind(null,'should not resolve')).catch( e => {
+      expect(taskState[DEFAULT_GROUP_NAME][taskName]).toBe(CANCELED_STATE)
+      expect(e instanceof CancelException).toBe(true)
+      done()
+    })
+
+  })
+
+  it('cancel a group task', (done) => {
+
+    const cancelEvent = 'cancelEvent'
+
+    bus.listen(listen(eventName, nameGroup(function* () {
+      yield delay(waitTime)
+    }, groupName, taskName)))
+
+    bus.listen(listen(cancelEvent, function*({ cancelGroupTask }) {
+      cancelGroupTask(groupName, taskName)
+    }))
+
 
     const promise = bus.emit(eventName)
     // delay is important
@@ -46,12 +77,12 @@ describe('cancel', () => {
 
     Promise.all([
       delay(checkTime).then(() => {
-        expect(taskState[taskName]).toBe(PENDING_STATE)
+        expect(taskState[groupName][taskName]).toBe(PENDING_STATE)
         bus.emit(cancelEvent)
       }),
       promise
     ]).then(done.bind(null,'should not resolve')).catch( e => {
-      expect(taskState[taskName]).toBe(CANCELED_STATE)
+      expect(taskState[groupName][taskName]).toBe(CANCELED_STATE)
       expect(e instanceof CancelException).toBe(true)
       done()
     })
