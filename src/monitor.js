@@ -3,7 +3,6 @@ import { DEFAULT_GROUP_NAME } from './util'
 import { shallowEqual } from './helpers'
 import hoistStatics from 'hoist-non-react-statics'
 import storeShape from './storeShape'
-import assign from 'object-assign'
 
 function getDisplayName(WrappedComponent) {
   return WrappedComponent.displayName || WrappedComponent.name || 'Component'
@@ -52,7 +51,7 @@ export default function monitor(mapStateToProps, mapEmitToProps) {
           this.hasStatusChanged = true
           this.setState({ taskState: newMappedStates })
         }else {
-          console.log('every task is the same', newMappedStates, this.state.taskState)
+          // nothing happened
         }
       }
 
@@ -63,8 +62,6 @@ export default function monitor(mapStateToProps, mapEmitToProps) {
       render() {
         this.haveOwnPropsChanged = false
         this.hasStatusChanged = false
-
-        console.log('reRender')
 
         const emitProps = finalMapEmitToProps(this.bus.emit.bind(this.bus))
 
