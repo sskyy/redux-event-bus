@@ -113,7 +113,7 @@ const App = (props) => {
 const MonitorApp = monitor(task => { return { task } })(App)
 ```
 
-Code can be found here: [https://github.com/sskyy/redux-task/examples/basic](https://github.com/sskyy/redux-task/examples/basic).
+Code can be found here: [https://github.com/sskyy/redux-task/tree/master/examples/basic](https://github.com/sskyy/redux-task/tree/master/examples/basic).
 
 ## Why Another Side Effects Library?
 
