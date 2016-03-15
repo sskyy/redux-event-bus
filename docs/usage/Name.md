@@ -1,8 +1,8 @@
 #  Name a task
 
-Nearly anything synchronous can be named as task, event a event listener.
+Nearly anything synchronous can be named as a task, even a event listener.
 
-#### Name listener as task
+#### Name a listener
 
 ```javascript
 listen('login', name(function* () {

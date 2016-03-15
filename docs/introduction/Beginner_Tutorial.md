@@ -1,6 +1,6 @@
 #  Quick Start
 
-One of the most annoying things about managing asynchronicity in redux is that you have to manually set multiple state in store to indicate the states of you asynchronous action such as fetching data from server. To handle on asynchronous action, usually three state are needed, `REQUEST_START`, `REQUEST_SUCCEED` and `REQUEST_FAILED`. What if there is a central palce automatically hold all the asynchronous action and their state for you, and all you need to do is name the asynchronous action if you need to put their state in components. Let's see how we can acheive this.
+One of the most annoying things about managing asynchronicity in redux is that you have to manually set multiple state in store to indicate the states of you asynchronous action such as fetching data from server. To handle on asynchronous action, usually three state are needed, `REQUEST_START`, `REQUEST_SUCCEED` and `REQUEST_FAILED`. What if there is a central place automatically hold all the asynchronous action and their state for you, and all you need to do is name the asynchronous action. Let's see how we can achieve this.
 
 ## Step 1: create a event listener
 
@@ -35,7 +35,7 @@ const store = createStore(reducer, {}, createEnhancer([loginListener]));
 
 ## Step 3: monitor the task state in react component
 
-Finally, let's see how to emit a event, and how to get the state of the yield task. We will use api `monitor` to wrap our component. The usage is quite similar as redux api `connect`. It takes a function to map task state to props. And monitor will pass an aditional method called `emit` to your component, so you can use it to emit evemt.
+Finally, let's see how to emit a event, and how to get the state of the yield task. We will use API `monitor` to wrap our component. The usage is quite similar as redux API `connect`. It takes a function to map task state to props. And monitor will pass an additional method called `emit` to your component, so you can use it to emit event.
 
 ```javascript
 import {monitor} from 'redux-task'

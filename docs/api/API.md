@@ -4,12 +4,12 @@
 
 #### Arguments
 
- - event(String|Function) : use a string or a function to match certain event.
- - handler(Generator) : code will be executed when event match. listener will receive two part of arguments. The first is an object with basic APIs, the second is the arguments emitted with the event.
+ - event(String|Function) : Use a string or a function to match certain event.
+ - handler(Generator) : Code will be executed when event match. Listener will receive two parts of arguments. The first is an object with basic APIs, the second is the arguments emitted with the event.
 
 #### Returns
 
-EventHandler: internal data structure.
+EventHandler: Internal data structure.
 
 #### Examples
 
@@ -17,7 +17,7 @@ EventHandler: internal data structure.
 listen('login', function *(){})
 ```
 
-use a function which returns a bool to match event:
+Use a function which returns a bool to match event:
 
 ```javascript
 listen(function(event){
@@ -27,7 +27,7 @@ listen(function(event){
 
 Listen to a redux action:
 
-Actually, when a action is dispatched, the action will be emit as event also. So we can use a function to match actions we want:
+Actually, when a action is dispatched, the action will be emitted just as an event. So we can use a function to match actions we want:
 
  ```javascript
  listen(function(action){
@@ -35,7 +35,7 @@ Actually, when a action is dispatched, the action will be emit as event also. So
  }, function *(){})
  ```
 
- or use a helper function to match certain action type:
+ Or use a helper function to match certain action type:
 
  ```javascript
  listen( fromReduxAction('some-redux-action-type'), function *(){
@@ -46,7 +46,7 @@ Actually, when a action is dispatched, the action will be emit as event also. So
 
 #### Arguments
 
-  - asynchronousAction(Generator|Promise|Function) : Internally we use **co.js** like machanism to handle asynchronous code. So, you can name anything can be yield by co.
+  - asynchronousAction(Generator|Promise|Function) : Internally we use **co.js** like machanism to handle asynchronous code. So, you can name anything can be yield by co.js.
   - name(String) : unique name of the task.
 
 #### Returns
@@ -55,7 +55,7 @@ Actually, when a action is dispatched, the action will be emit as event also. So
 
 # `getTaskState(taskName)`
 
-This api can only be achieved in listener. Task have three state: **pending**, **fulfilled** and **rejected**.
+This api can only be achieved in listener. Task may have three type of state: **pending**, **fulfilled** and **rejected**.
 
 #### Returns
 
@@ -81,7 +81,7 @@ listen('login', function *({getTaskState}){
 
  - name(String) : The name of task to cancel.
 
-This api can only be achieved in listener.
+This API can only be achieved in listener.
 
 #### Example
 
@@ -95,7 +95,7 @@ listen('login', function *({cancel, getTaskState}){
 
 # `dispatch()`
 
-The same as redux dispatch method. This api can only be achieved in listener.
+The same as redux dispatch method. This API can only be achieved in listener.
 
 #### Example
 
@@ -107,7 +107,7 @@ listen('login', function *({dispatch}){
 
 # `getState()`
 
-The same as redux getState method. This api can only be achieved in listener.
+The same as redux getState method. This API can only be achieved in listener.
 
 #### Example
 

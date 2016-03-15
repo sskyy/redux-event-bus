@@ -1,6 +1,7 @@
 # Cancel a task by name
 
-Let's say our use submitted a  login form, and quickly click the cancel button. We will have two event listener, one listens to event `login`, and the other listens to `cancel-login`.
+Scenario: User submitted a  login form, and quickly clicked the cancel button.
+We will declare two event listener, one listens to event `login`, and the other listens to `cancel-login`.
 
 ```javascript
 import { listen, name } from 'redux-task'
@@ -13,7 +14,7 @@ function* loginCurrentUser({ dispatch }) {
 	dispatch({type:'update-current-user'})
 }
 
-const loginListener = listen('login', name(hello, 'loginTask'))
+const loginListener = listen('login', name(loginCurrentUser, 'loginTask'))
 
 const cancelListener = listen('cancel-login', function* ({ cancel, getTaskState }) {
 	const taskState = getTaskState()

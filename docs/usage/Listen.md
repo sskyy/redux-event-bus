@@ -16,11 +16,11 @@ listen(function (event) {
 
 #  Listen to a redux action
 
-Actually, when a redux action is dispatched, the action will be emit as event also. So we can use a function to match actions.
+Actually, when a redux action is dispatched, the action will be emitted just as an event. So we can use a function to match the action.
 
  ```javascript
  listen(function(action){
-   return  action.type && action.type=== 'some-redux-action-type'
+   return  action.type && action.type === 'some-redux-action-type'
  }, function* (){})
  ```
 

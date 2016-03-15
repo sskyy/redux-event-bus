@@ -1,6 +1,6 @@
 # Query task state in listener
 
-Task state can be queried from listener. There are several API can do this.
+Task state can be queried inside listener. There are several API can do this.
 
 #### getTaskState
 
