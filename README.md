@@ -5,7 +5,7 @@
 [![npm version](https://img.shields.io/npm/v/redux-task.svg?style=flat-square)](https://www.npmjs.com/package/redux-task)
 
 [Documents](http://sskyy.github.io/redux-task).
-A Side Effects manager for redux. The idea is really simple : e give an asynchronous task(such as fetch data from server) a name, then we can use the name to get the state of the task or cancel it if we want. You will no longer need to set state like `isSubmitting` to indicate asynchronous action state.
+A Side Effects enhancer for redux. The idea is simple: By given an asynchronous task(such as submitting data to server) a name, redux-task will create and handle the task state for you automatically. Then you can retrieve the state with the task name in your component easily. No need to create store state like `isSubmitting` or `submitFailed` and manully change them any more. 
 
 
 ## Usage Example
@@ -84,6 +84,7 @@ const EVENT = 'fetch_event'
 const TASK = 'fetch_task'
 
 const listener =  listen(EVENT, function* listener() {
+  // give a name to the asynchronous task
   yield name(fetch('data_url'), TASK)
 })
 ```
@@ -93,6 +94,7 @@ const listener =  listen(EVENT, function* listener() {
 ```javascript
 const App = (props) => {
   let message = ''
+  // automatically get state of the named task
   if( props.task[TASK] === 'fulfilled') {
     message = 'success'
   }else if(props.task[TASK] === 'rejected') {
@@ -113,12 +115,14 @@ const App = (props) => {
 const MonitorApp = monitor(task => { return { task } })(App)
 ```
 
-Code can be found here: [https://github.com/sskyy/redux-task/examples/basic](https://github.com/sskyy/redux-task/examples/basic).
+Code can be found here: [https://github.com/sskyy/redux-task/examples/basic](https://github.com/sskyy/redux-task/examples/basic).  
+
+More examples such as how to cancel a task can be found here: [https://github.com/sskyy/redux-task/tree/master/examples](https://github.com/sskyy/redux-task/tree/master/examples).
 
 ## Why Another Side Effects Library?
 
  - Save your time to create state for async actions.
- - Generator and Promise are perfect for async flow control. Advanced scenario like **cancel a async action** can be handled easily. See [example](https://github.com/sskyy/redux-task/tree/master/examples). Thanks redux-saga for the thought.
+ - Generator and Promise are perfect for async flow control. Advanced scenario like **cancel a async action** can be handled easily. Thanks redux-saga for the thought.
  - It's much intuitive than competitors.
 
 ## License
