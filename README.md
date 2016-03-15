@@ -115,7 +115,7 @@ const App = (props) => {
 const MonitorApp = monitor(task => { return { task } })(App)
 ```
 
-Code can be found here: [https://github.com/sskyy/redux-task/examples/basic](https://github.com/sskyy/redux-task/examples/basic).  
+Code can be found here: [https://github.com/sskyy/redux-task/examples/basic](https://github.com/sskyy/redux-task/examples/basic).
 
 More examples such as how to cancel a task can be found here: [https://github.com/sskyy/redux-task/tree/master/examples](https://github.com/sskyy/redux-task/tree/master/examples).
 
