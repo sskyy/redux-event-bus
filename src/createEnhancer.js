@@ -50,24 +50,24 @@ function unliftState(liftedState) {
   return liftedState.computedState
 }
 
-function unliftStore(liftedStore, liftReducer, bus) {
+function unliftStore(reduxTaskLiftedStore, liftReducer, bus) {
   return {
-    ...liftedStore,
+    ...reduxTaskLiftedStore,
 
-    liftedStore,
+    reduxTaskLiftedStore,
 
     dispatch(action) {
-      liftedStore.dispatch(liftAction(action))
+      reduxTaskLiftedStore.dispatch(liftAction(action))
       bus.emit(action)
       return action
     },
 
     getState() {
-      return unliftState(liftedStore.getState())
+      return unliftState(reduxTaskLiftedStore.getState())
     },
 
     replaceReducer(nextReducer) {
-      liftedStore.replaceReducer(liftReducer(nextReducer))
+      reduxTaskLiftedStore.replaceReducer(liftReducer(nextReducer))
     }
   }
 }

@@ -21,10 +21,10 @@ export default function monitor(mapStateToProps, mapEmitToProps) {
 
       constructor(props, context) {
         super(props, context)
-        if (context.store.liftedStore === undefined) {
+        if (context.store.reduxTaskLiftedStore === undefined) {
           throw new Error('Did you forget to use enhancer to create store?')
         }
-        this.bus = context.store.liftedStore.bus
+        this.bus = context.store.reduxTaskLiftedStore.bus
         const groupState = { ...this.bus.state }
         delete groupState[DEFAULT_GROUP_NAME]
 
