@@ -1,0 +1,53 @@
+{
+  "name": "redux-task",
+  "version": "0.0.9",
+  "description": "A asynchronous task manager for redux",
+  "main": "lib/index.js",
+  "scripts": {
+    "clean": "rimraf lib",
+    "lint": "eslint src test",
+    "check": "npm run lint && npm run test",
+    "build": "babel src --out-dir lib",
+    "test": "mocha --compilers js:babel/register --recursive",
+    "test:cov": "babel-node $(npm bin)/isparta cover $(npm bin)/_mocha -- --recursive",
+    "preversion": "npm run clean && npm run check",
+    "version": "npm run build",
+    "postversion": "git push && git push --tags && npm run clean && npm run docs:publish",
+    "prepublish": "npm run clean && npm run build",
+    "docs:clean": "rimraf _book",
+    "docs:prepare": "gitbook install",
+    "docs:build": "npm run docs:prepare && gitbook build -g sskyy/redux-task",
+    "docs:watch": "npm run docs:prepare && gitbook serve",
+    "docs:publish": "npm run docs:clean && npm run docs:build && cd _book && git init && git commit --allow-empty -m 'update book' && git checkout -b gh-pages && touch .nojekyll && git add . && git commit -am 'update book' && git push git@github.com:sskyy/redux-task gh-pages --force"
+  },
+  "repository": {},
+  "keywords": [],
+  "authors": [
+    "sskyy"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "babel": "^5.5.8",
+    "babel-core": "^5.6.18",
+    "babel-eslint": "^4.1.0",
+    "babel-loader": "^5.1.4",
+    "eslint": "^1.7.1",
+    "eslint-config-rackt": "1.0.0",
+    "eslint-plugin-react": "^3.6.3",
+    "expect": "^1.8.0",
+    "gitbook-cli": "^0.3.4",
+    "isparta": "^3.0.3",
+    "mocha": "^2.2.5",
+    "rimraf": "^2.3.4",
+    "webpack": "^1.9.6"
+  },
+  "dependencies": {
+    "hoist-non-react-statics": "^1.0.5",
+    "lodash.clonedeep": "~4.3.0",
+    "object-assign": "^4.0.1",
+    "react": "^0.14.7",
+    "react-redux": "~4.4.0",
+    "redux": "~3.3.1",
+    "shallowequal": "^0.2.2"
+  }
+}
